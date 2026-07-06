@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>HarudAI — Smart Farming for a Healthier Harvest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#ffffff;
+    --paper:#f5f8f3;
+    --forest:#1f5b3f;
+    --forest-dark:#123c28;
+    --forest-tint:#e6f0e8;
+    --saffron:#d99a2b;
+    --saffron-tint:#faedd3;
+    --soil:#6b4a2f;
+    --ink:#25302a;
+    --ink-soft:#5b665f;
+    --line:#e3e8de;
+    --danger:#b23a2e;
+    --danger-tint:#f7e3e0;
+    --safe:#3e7a4e;
+    --safe-tint:#e4f0e6;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(31,91,63,0.08);
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-urdu:'Noto Nastaliq Urdu', serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+  .app{
+    max-width:430px;
+    margin:0 auto;
+    background:var(--white);
+    min-height:100vh;
+    position:relative;
+    padding-bottom:78px;
+    box-shadow:0 0 40px rgba(0,0,0,0.06);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;gap:10px;
+    padding:16px 18px 10px;
+    background:var(--white);
+  }
+  .logo-mark{
+    width:38px;height:38px;flex-shrink:0;
+  }
+  .logo-text{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:21px;
+    color:var(--forest-dark);
+    letter-spacing:0.2px;
+  }
+  .logo-sub{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:1px;
+  }
+
+  /* ---------- Slider ---------- */
+  .slider{
+    position:relative;
+    margin:6px 16px 0;
+    border-radius:18px;
+    overflow:hidden;
+    height:190px;
+    box-shadow:var(--shadow);
+  }
+  .slide{
+    position:absolute;inset:0;
+    display:flex;align-items:flex-end;
+    opacity:0;
+    transition:opacity 0.9s ease;
+    color:var(--white);
+  }
+  .slide.active{opacity:1;}
+  .slide .scene{position:absolute;inset:0;}
+  .slide .fade{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(18,60,40,0) 35%, rgba(15,40,28,0.78) 100%);
+  }
+  .slide .caption{
+    position:relative;padding:16px 18px 18px;z-index:2;
+  }
+  .slide .caption .eyebrow{
+    font-size:11px;text-transform:uppercase;letter-spacing:1.2px;
+    color:var(--saffron-tint);opacity:0.95;font-weight:600;
+  }
+  .slide .caption h2{
+    font-family:var(--font-display);
+    font-size:19px;margin:4px 0 0;font-weight:600;line-height:1.25;
+  }
+  .slide-dots{
+    position:absolute;bottom:10px;right:14px;z-index:3;
+    display:flex;gap:5px;
+  }
+  .slide-dots span{
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    transition:background 0.3s, width 0.3s;
+  }
+  .slide-dots span.active{background:var(--white);width:16px;border-radius:4px;}
+
+  /* orchard-row scene illustrations (stand-ins for real orchard photography) */
+  .scene-apple{background:linear-gradient(180deg,#bfe0d4 0%, #6fa383 42%, #2f6b4a 100%);}
+  .scene-walnut{background:linear-gradient(180deg,#d9e3c9 0%, #8fa96b 42%, #4f6b34 100%);}
+  .scene-saffron{background:linear-gradient(180deg,#f3ded6 0%, #d99a6a 42%, #a15a3a 100%);}
+  .scene-phone{background:linear-gradient(180deg,#cfe3d6 0%, #6f9a80 42%, #1f5b3f 100%);}
+  .scene-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .row-pattern{
+    position:absolute;left:0;right:0;bottom:0;height:60%;
+    background-repeat:repeat-x;background-size:38px 100%;
+    opacity:0.55;
+  }
+  .scene-apple .row-pattern{background-image:radial-gradient(circle at 50% 20%, rgba(255,255,255,0.35) 0 3px, transparent 4px), linear-gradient(180deg, transparent 0%, rgba(18,60,40,0.5) 100%);}
+  .scene-walnut .row-pattern{background-image:radial-gradient(circle at 50% 15%, rgba(255,255,255,0.3) 0 4px, transparent 5px), linear-gradient(180deg, transparent 0%, rgba(60,70,25,0.5) 100%);}
+  .scene-saffron .row-pattern{background-image:radial-gradient(ellipse at 50% 30%, rgba(180,80,190,0.45) 0 3px, transparent 4px), linear-gradient(180deg, transparent 0%, rgba(90,45,25,0.5) 100%);}
+  .scene-phone .row-pattern{background-image:none;}
+
+  /* ---------- Section headers ---------- */
+  .section{padding:22px 18px 4px;}
+  .section-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .section-head h3{
+    font-family:var(--font-display);
+    font-size:16.5px;font-weight:600;margin:0;color:var(--forest-dark);
+  }
+  .row-divider{
+    height:10px;margin:2px 0 0;
+    background-image:repeating-linear-gradient(90deg, var(--forest) 0 4px, transparent 4px 22px);
+    opacity:0.35;
+  }
+
+  /* ---------- Home grid ---------- */
+  .primary-cta{
+    display:flex;align-items:center;gap:14px;
+    background:var(--forest);
+    color:var(--white);
+    border:none;
+    border-radius:var(--radius);
+    padding:16px 18px;
+    width:100%;
+    font-family:var(--font-body);
+    font-size:16px;font-weight:700;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(31,91,63,0.28);
+    margin-top:4px;
+  }
+  .primary-cta .ic{
+    width:34px;height:34px;flex-shrink:0;
+  }
+  .primary-cta small{display:block;font-weight:500;font-size:12.5px;opacity:0.85;margin-top:2px;}
+
+  .grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;
+  }
+  .tile{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 12px;
+    display:flex;flex-direction:column;gap:8px;
+    cursor:pointer;
+    transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .tile:active{transform:scale(0.97);}
+  .tile .ic{width:26px;height:26px;color:var(--forest);}
+  .tile span{font-size:13.5px;font-weight:600;color:var(--ink);}
+
+  /* ---------- Buttons / chips ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border-radius:11px;padding:13px 16px;font-weight:700;font-size:14.5px;
+    border:1.5px solid var(--forest);cursor:pointer;font-family:var(--font-body);
+  }
+  .btn-primary{background:var(--forest);color:var(--white);border-color:var(--forest);}
+  .btn-outline{background:var(--white);color:var(--forest);}
+  .btn-block{width:100%;}
+  .chip{
+    padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--white);font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .chip.active{background:var(--forest-tint);border-color:var(--forest);color:var(--forest-dark);}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .crop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .crop-card{border-radius:12px;overflow:hidden;border:1.5px solid var(--line);cursor:pointer;background:var(--white);position:relative;}
+  .crop-card img{width:100%;height:64px;object-fit:cover;display:block;}
+  .crop-card span{display:block;text-align:center;font-size:12px;font-weight:700;padding:6px 4px;color:var(--ink);}
+  .crop-card.active{border-color:var(--forest);box-shadow:0 0 0 2px var(--forest-tint);}
+  .crop-card.active span{color:var(--forest-dark);}
+
+  /* ---------- Screens ---------- */
+  .screen{display:none;padding-bottom:12px;}
+  .screen.active{display:block;}
+  .screen-header{
+    display:flex;align-items:center;gap:10px;
+    padding:16px 18px 6px;
+  }
+  .back-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    border:1px solid var(--line);
+  }
+  .screen-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--forest-dark);}
+
+  /* Upload / scan */
+  .dropzone{
+    margin:14px 18px 0;
+    border:2px dashed var(--forest);
+    background:var(--forest-tint);
+    border-radius:var(--radius);
+    padding:30px 16px;
+    text-align:center;
+    cursor:pointer;
+  }
+  .dropzone .ic{width:40px;height:40px;color:var(--forest);margin-bottom:8px;}
+  .dropzone p{margin:2px 0;font-size:14px;color:var(--forest-dark);font-weight:600;}
+  .dropzone small{color:var(--ink-soft);font-size:12.5px;}
+  .preview-wrap{margin:14px 18px 0;}
+  .preview-img{width:100%;height:200px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--line);}
+
+  .analyzing{
+    display:flex;flex-direction:column;align-items:center;gap:12px;
+    padding:34px 18px;
+  }
+  .spinner{
+    width:44px;height:44px;border-radius:50%;
+    border:4px solid var(--forest-tint);border-top-color:var(--forest);
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Result page */
+  .result-card{margin:14px 18px 0;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;}
+  .lang-toggle{display:flex;gap:8px;margin:0 18px 4px;justify-content:flex-end;}
+  .lang-toggle button{
+    padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;
+    border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);cursor:pointer;
+  }
+  .lang-toggle button.active{border-color:var(--forest);background:var(--forest-tint);color:var(--forest-dark);}
+  .r-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);gap:10px;}
+  .r-row:last-child{border-bottom:none;}
+  .r-label{font-size:12.5px;color:var(--ink-soft);font-weight:600;min-width:92px;}
+  .r-value{font-size:14px;color:var(--ink);font-weight:600;text-align:right;}
+  .r-value.urdu, .r-label.urdu{font-family:var(--font-urdu);direction:rtl;font-size:16px;line-height:1.9;}
+  .severity-pill{padding:3px 11px;border-radius:999px;font-size:12px;font-weight:700;}
+  .sev-medium{background:var(--saffron-tint);color:#8a5c14;}
+  .sev-high{background:var(--danger-tint);color:var(--danger);}
+  .sev-low{background:var(--safe-tint);color:var(--safe);}
+  .weather-risk{
+    margin:14px 18px 0;background:var(--saffron-tint);border:1px solid #eecf94;
+    border-radius:var(--radius);padding:12px 14px;font-size:13.5px;color:#8a5c14;font-weight:600;
+    display:flex;gap:8px;align-items:flex-start;
+  }
+  .result-actions{display:flex;gap:10px;margin:16px 18px 0;}
+  .result-actions .btn{flex:1;}
+  .voice-btn{
+    margin:14px 18px 0;width:calc(100% - 36px);
+    background:var(--forest-dark);color:var(--white);border:none;border-radius:var(--radius);
+    padding:14px;font-family:var(--font-urdu);font-size:17px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+  }
+
+  /* Dashboard */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;}
+  .stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+  .stat-card .num{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--forest-dark);}
+  .stat-card .lbl{font-size:12px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+
+  /* History list */
+  .history-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:13px 18px;border-bottom:1px solid var(--line);cursor:pointer;
+  }
+  .history-item .hi-left{display:flex;flex-direction:column;gap:2px;}
+  .history-item .hi-crop{font-weight:700;font-size:14.5px;}
+  .history-item .hi-date{font-size:12px;color:var(--ink-soft);}
+
+  /* Weather */
+  .weather-hero{
+    margin:14px 18px 0;border-radius:var(--radius);
+    background:linear-gradient(160deg,#7fb896,#1f5b3f);
+    color:var(--white);padding:20px;
+  }
+  .weather-hero .temp{font-family:var(--font-display);font-size:40px;font-weight:600;}
+  .weather-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;}
+  .weather-metrics div{background:rgba(255,255,255,0.14);border-radius:10px;padding:8px 6px;text-align:center;}
+  .weather-metrics .wv{font-weight:700;font-size:14px;}
+  .weather-metrics .wl{font-size:10.5px;opacity:0.85;margin-top:2px;}
+
+  /* Expert / schemes / about */
+  .card-list{padding:0 18px;display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+  .plain-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+  .plain-card h4{margin:0 0 4px;font-size:14.5px;font-family:var(--font-display);color:var(--forest-dark);}
+  .plain-card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  textarea, input[type=text]{
+    width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;
+    font-family:var(--font-body);font-size:14px;resize:none;
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:430px;background:var(--white);
+    border-top:1px solid var(--line);
+    display:flex;justify-content:space-around;padding:8px 4px 10px;
+    box-shadow:0 -2px 12px rgba(0,0,0,0.06);
+  }
+  .nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--ink-soft);cursor:pointer;font-size:10.5px;font-weight:600;
+    width:64px;
+  }
+  .nav-item.active{color:var(--forest);}
+  .nav-item svg{width:22px;height:22px;}
+
+  .toast{
+    position:fixed;bottom:92px;left:50%;transform:translateX(-50%);
+    background:var(--forest-dark);color:var(--white);padding:10px 18px;
+    border-radius:999px;font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:opacity 0.25s, bottom 0.25s;
+    z-index:50;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;bottom:100px;}
+
+  @media print{
+    .bottom-nav, .screen-header .back-btn, .lang-toggle, .result-actions, .voice-btn{display:none !important;}
+    .app{box-shadow:none;padding-bottom:0;}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen active" id="screen-home">
+    <div class="topbar">
+      <svg class="logo-mark" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="23" fill="#e6f0e8"/>
+        <path d="M24 34c-7 0-12-5.5-12-12.5C12 14 18 9 24 9s12 5 12 12.5C36 28.5 31 34 24 34z" fill="#1f5b3f"/>
+        <path d="M24 9c1.5 3 1.5 7 0 10" stroke="#123c28" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="24" cy="9" r="2.4" fill="#d99a2b"/>
+      </svg>
+      <div>
+        <div class="logo-text">HarudAI</div>
+        <div class="logo-sub">Smart Farming for a Healthier Harvest</div>
+      </div>
+    </div>
+
+    <div class="slider" id="slider">
+      <div class="slide active">
+        <div class="scene scene-apple"><img class="scene-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Apple_Garden_in_Kashmir.jpg" alt="Apple orchard in Kashmir" onerror="this.style.display='none'"><div class="row-pattern"></div></div>
+        <div class="fade"></div>
+        <div class="caption"><div class="eyebrow">Apple Orchards</div><h2>Protect Apple Orchards with AI</h2></div>
+      </div>
+      <div class="slide">
+        <div class="scene scene-walnut"><img class="scene-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Walnut-tree%2020041012%202599.JPG" alt="Walnut tree" onerror="this.style.display='none'"><div class="row-pattern"></div></div>
+        <div class="fade"></div>
+        <div class="caption"><div class="eyebrow">Walnut Farming</div><h2>Early Disease Detection for Better Yield</h2></div>
+      </div>
+      <div class="slide">
+        <div class="scene scene-saffron"><img class="scene-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Pampore%2C%20Jammu%20and%20Kashmir.jpg" alt="Pampore saffron fields, Kashmir" onerror="this.style.display='none'"><div class="row-pattern"></div></div>
+        <div class="fade"></div>
+        <div class="caption"><div class="eyebrow">Saffron Fields</div><h2>Technology Supporting Kashmir Farmers</h2></div>
+      </div>
+      <div class="slide">
+        <div class="scene scene-phone"><img class="scene-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/India%20Farming.jpg" alt="Farmer in the field" onerror="this.style.display='none'"></div>
+        <div class="fade"></div>
+        <div class="caption"><div class="eyebrow">In Every Farmer's Hands</div><h2>AI Guidance in Your Hands</h2></div>
+      </div>
+      <div class="slide-dots" id="slideDots"></div>
+    </div>
+    <div style="padding:4px 20px 0;font-size:10px;color:var(--ink-soft);text-align:right;">Photos: Wikimedia Commons contributors, CC BY-SA</div>
+
+    <div class="section">
+      <button class="primary-cta" onclick="goto('scan')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M4 8a2 2 0 0 1 2-2h1.2l.9-1.4A1 1 0 0 1 8.9 4h6.2a1 1 0 0 1 .8.6L16.8 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+        <div style="text-align:left;">
+          Upload Crop Image
+          <small>Leaf, fruit or plant photo</small>
+        </div>
+      </button>
+    </div>
+
+    <div class="row-divider" style="margin:20px 18px 0;"></div>
+
+    <div class="section">
+      <div class="section-head"><h3>Quick actions</h3></div>
+      <div class="grid">
+        <div class="tile" onclick="goto('scan')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="4.2"/></svg>
+          <span>Scan Disease</span>
+        </div>
+        <div class="tile" onclick="goto('history')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+          <span>Disease History</span>
+        </div>
+        <div class="tile" onclick="goto('weather')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17a4 4 0 1 1 1.3-7.8A5 5 0 0 1 18 11a3.5 3.5 0 0 1-.5 7H7Z"/></svg>
+          <span>Weather Alerts</span>
+        </div>
+        <div class="tile" onclick="goto('expert')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 1 1-3.8-7.1M21 4l-6 6"/></svg>
+          <span>Expert Consultation</span>
+        </div>
+        <div class="tile" onclick="goto('schemes')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6"/></svg>
+          <span>Govt Schemes</span>
+        </div>
+        <div class="tile" onclick="goto('about')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>About HarudAI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Supported crops</h3></div>
+      <div class="crop-grid">
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Apple_fruit.jpg" alt="Apple" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Apple</span></div>
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/English_Walnuts.jpg" alt="Walnut" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Walnut</span></div>
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Crocus%20sativus%20-%20Saffron%20crocus%20-%20Safran%2003.JPG" alt="Saffron" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Saffron</span></div>
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Tomato_planting.jpg" alt="Tomato" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Tomato</span></div>
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Potatoes.jpg" alt="Potato" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Potato</span></div>
+        <div class="crop-card"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Paddy%20Field%20in%20Palakkad.jpg" alt="Rice" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Rice</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCAN ============ -->
+  <section class="screen" id="screen-scan">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Scan for Disease</div>
+    </div>
+    <div class="section" style="padding-top:6px;">
+      <div class="section-head"><h3>1. Select crop</h3></div>
+      <div class="crop-grid" id="cropChips">
+        <div class="crop-card active" data-crop="Apple"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Apple_fruit.jpg" alt="Apple" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Apple</span></div>
+        <div class="crop-card" data-crop="Walnut"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/English_Walnuts.jpg" alt="Walnut" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Walnut</span></div>
+        <div class="crop-card" data-crop="Saffron"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Crocus%20sativus%20-%20Saffron%20crocus%20-%20Safran%2003.JPG" alt="Saffron" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Saffron</span></div>
+        <div class="crop-card" data-crop="Tomato"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Tomato_planting.jpg" alt="Tomato" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Tomato</span></div>
+        <div class="crop-card" data-crop="Potato"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Potatoes.jpg" alt="Potato" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Potato</span></div>
+        <div class="crop-card" data-crop="Rice"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Paddy%20Field%20in%20Palakkad.jpg" alt="Rice" onerror="this.parentElement.style.background='var(--forest-tint)';this.remove();"><span>Rice</span></div>
+      </div>
+    </div>
+    <div class="section" style="padding-top:14px;">
+      <div class="section-head"><h3>2. Add a photo</h3></div>
+    </div>
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('galleryInput').click()">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="margin:0 auto;display:block;"><path d="M4 8a2 2 0 0 1 2-2h1.2l.9-1.4A1 1 0 0 1 8.9 4h6.2a1 1 0 0 1 .8.6L16.8 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+      <p>Tap to upload a photo</p>
+      <small>Leaf, fruit or full plant — clear daylight photos work best</small>
+    </div>
+    <div style="display:flex;gap:10px;margin:10px 18px 0;">
+      <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('cameraInput').click()">📷 Take Photo</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('galleryInput').click()">🖼️ Choose from Gallery</button>
+    </div>
+    <p id="localFileNotice" style="display:none;margin:10px 18px 0;font-size:11.5px;color:var(--ink-soft);background:var(--saffron-tint);border-radius:10px;padding:9px 12px;">
+      Note: live AI scanning only works once this site is deployed on Netlify with the ANTHROPIC_API_KEY environment variable set — opening this file locally won't reach the backend.
+    </p>
+    <input type="file" id="galleryInput" class="harudai-file-input" accept="image/*" style="display:none;">
+    <input type="file" id="cameraInput" class="harudai-file-input" accept="image/*" capture="environment" style="display:none;">
+    <div class="preview-wrap" id="previewWrap" style="display:none;">
+      <img class="preview-img" id="previewImg" alt="Uploaded crop photo preview">
+    </div>
+    <div class="section" id="analyzeSection" style="display:none;">
+      <button class="btn btn-primary btn-block" onclick="startAnalysis()">Analyze Photo</button>
+    </div>
+    <div class="analyzing" id="analyzingBox" style="display:none;">
+      <div class="spinner"></div>
+      <p style="font-weight:600;color:var(--forest-dark);" id="analyzingText">Analyzing your photo…</p>
+      <small style="color:var(--ink-soft);">The AI is reading the leaf pattern, spots and colour in your actual photo</small>
+    </div>
+    <div id="analyzeError" style="display:none;margin:14px 18px 0;background:var(--danger-tint);color:var(--danger);border-radius:12px;padding:12px 14px;font-size:13.5px;font-weight:600;"></div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('scan')">&#8592;</div>
+      <div class="screen-title">Scan Report</div>
+    </div>
+    <div class="lang-toggle">
+      <button id="langUr" class="active" onclick="setLang('ur')">اردو</button>
+      <button id="langEn" onclick="setLang('en')">English</button>
+    </div>
+
+    <div class="result-card">
+      <div class="r-row"><span class="r-label" data-ur="فصل" data-en="Crop">فصل</span><span class="r-value" id="rCrop">Apple</span></div>
+      <div class="r-row"><span class="r-label" data-ur="مرض کا نام" data-en="Disease">مرض کا نام</span><span class="r-value" id="rDisease">Apple Scab</span></div>
+      <div class="r-row"><span class="r-label" data-ur="شدت" data-en="Severity">شدت</span><span class="r-value"><span class="severity-pill sev-medium" id="rSeverity">درمیانی</span></span></div>
+      <div class="r-row"><span class="r-label" data-ur="اعتماد" data-en="Confidence">اعتماد</span><span class="r-value" id="rConfidence">94%</span></div>
+    </div>
+
+    <div class="result-card">
+      <div class="r-row" style="flex-direction:column;align-items:flex-start;">
+        <span class="r-label" data-ur="ممکنہ وجہ" data-en="Possible cause" style="margin-bottom:4px;">ممکنہ وجہ</span>
+        <span class="r-value urdu" id="rCause" style="text-align:right;width:100%;">یہ نمی اور بارش کی وجہ سے پیدا ہونے والا فنگل انفیکشن ہے۔</span>
+      </div>
+      <div class="r-row" style="flex-direction:column;align-items:flex-start;">
+        <span class="r-label" data-ur="علاج" data-en="Treatment" style="margin-bottom:4px;">علاج</span>
+        <span class="r-value urdu" id="rTreatment" style="text-align:right;width:100%;">فنگس کش دوا کا اسپرے کریں۔</span>
+      </div>
+      <div class="r-row" style="flex-direction:column;align-items:flex-start;">
+        <span class="r-label" data-ur="بچاؤ" data-en="Prevention" style="margin-bottom:4px;">بچاؤ</span>
+        <span class="r-value urdu" id="rPrevention" style="text-align:right;width:100%;">متاثرہ پتوں کو ہٹا دیں اور باقاعدہ نگرانی کریں۔</span>
+      </div>
+    </div>
+
+    <div class="weather-risk">
+      <span>⚠️</span>
+      <span id="rWeatherRisk">اگلے 5 دنوں میں بیماری کا خطرہ زیادہ ہے۔</span>
+    </div>
+
+    <button class="voice-btn" onclick="playVoice()">🔊 <span id="voiceLabel">سنیں</span></button>
+    <p style="margin:10px 18px 0;font-size:11.5px;color:var(--ink-soft);line-height:1.5;">
+      This diagnosis is generated by AI from your photo and is a decision aid, not a certified lab test. For high-value crops or if unsure, confirm with a local agriculture officer before spraying.
+    </p>
+
+    <div class="result-actions">
+      <button class="btn btn-outline" onclick="shareReport()">Share</button>
+      <button class="btn btn-primary" onclick="window.print()">Download PDF</button>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section class="screen" id="screen-history">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Disease History</div>
+    </div>
+    <div id="historyList"></div>
+  </section>
+
+  <!-- ============ WEATHER ============ -->
+  <section class="screen" id="screen-weather">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Weather Alerts</div>
+    </div>
+    <div class="weather-hero">
+      <div style="font-size:13px;opacity:0.85;font-weight:600;" id="weatherLoc">Pulwama, Kashmir</div>
+      <div class="temp">18°C</div>
+      <div style="font-size:13px;opacity:0.9;">Partly cloudy, light showers expected</div>
+      <div class="weather-metrics">
+        <div><div class="wv">72%</div><div class="wl">Humidity</div></div>
+        <div><div class="wv">60%</div><div class="wl">Rain chance</div></div>
+        <div><div class="wv">11 km/h</div><div class="wl">Wind</div></div>
+      </div>
+    </div>
+    <div class="weather-risk">
+      <span>⚠️</span>
+      <span>High humidity and rain increase fungal disease risk over the next 5 days. Inspect orchards daily.</span>
+    </div>
+    <div class="section">
+      <button class="btn btn-outline btn-block" onclick="showToast('Using your device location…')">Use my location</button>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD (More) ============ -->
+  <section class="screen" id="screen-dashboard">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Your Dashboard</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">12</div><div class="lbl">Total Scans</div></div>
+      <div class="stat-card"><div class="num">2</div><div class="lbl">Active Alerts</div></div>
+      <div class="stat-card"><div class="num">5</div><div class="lbl">Recent Reports</div></div>
+      <div class="stat-card"><div class="num">18°C</div><div class="lbl">Weather Now</div></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><h3>Shortcuts</h3></div>
+      <div class="grid">
+        <div class="tile" onclick="goto('history')"><span>View History</span></div>
+        <div class="tile" onclick="goto('weather')"><span>Weather Updates</span></div>
+        <div class="tile" onclick="goto('expert')"><span>Ask an Expert</span></div>
+        <div class="tile" onclick="goto('schemes')"><span>Govt Schemes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERT ============ -->
+  <section class="screen" id="screen-expert">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Expert Consultation</div>
+    </div>
+    <div class="section" style="padding-top:6px;">
+      <textarea rows="3" placeholder="Describe the problem you're seeing…"></textarea>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('galleryInput').click()">Attach Photo</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="showToast('Your question was sent to an expert.')">Ask Question</button>
+      </div>
+    </div>
+    <div class="card-list">
+      <div class="plain-card">
+        <h4>Ghulam A. — Pulwama</h4>
+        <p>My walnut leaves have brown spots spreading fast. What should I do?</p>
+      </div>
+      <div class="plain-card">
+        <h4>Expert reply</h4>
+        <p>This looks like walnut leaf blotch. Remove affected leaves and apply a copper-based spray before the next rain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEMES ============ -->
+  <section class="screen" id="screen-schemes">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">Government Schemes</div>
+    </div>
+    <div class="card-list">
+      <div class="plain-card"><h4>Horticulture Mission for J&K</h4><p>Subsidy support for high-density apple plantation and orchard modernisation.</p></div>
+      <div class="plain-card"><h4>Saffron Mission</h4><p>Support for saffron corm replacement, irrigation and quality certification.</p></div>
+      <div class="plain-card"><h4>PM Fasal Bima Yojana</h4><p>Crop insurance cover against disease, pest and weather-related losses.</p></div>
+      <div class="plain-card"><h4>Farmer Welfare Programme</h4><p>Direct benefit transfer and training support for registered farmers.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="screen" id="screen-about">
+    <div class="screen-header">
+      <div class="back-btn" onclick="goto('home')">&#8592;</div>
+      <div class="screen-title">About HarudAI</div>
+    </div>
+    <div class="section" style="padding-top:6px;">
+      <p style="font-size:14px;line-height:1.7;color:var(--ink-soft);">
+        HarudAI helps Kashmir's apple, walnut and saffron growers spot crop disease early, in their own language.
+        Take a photo, get a clear diagnosis and treatment plan, and listen to the result in Urdu — built for the
+        realities of orchard and field work, not office dashboards.
+      </p>
+      <p style="font-size:14px;line-height:1.7;color:var(--ink-soft);">
+        "Harud" means autumn — the season of harvest in Kashmir. Our goal is a healthier harvest for every farmer,
+        from Sopore to Pahalgam.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-nav="home" onclick="goto('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </div>
+    <div class="nav-item" data-nav="scan" onclick="goto('scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8a2 2 0 0 1 2-2h1.2l.9-1.4A1 1 0 0 1 8.9 4h6.2a1 1 0 0 1 .8.6L16.8 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+      Scan
+    </div>
+    <div class="nav-item" data-nav="history" onclick="goto('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      History
+    </div>
+    <div class="nav-item" data-nav="weather" onclick="goto('weather')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17a4 4 0 1 1 1.3-7.8A5 5 0 0 1 18 11a3.5 3.5 0 0 1-.5 7H7Z"/></svg>
+      Weather
+    </div>
+    <div class="nav-item" data-nav="dashboard" onclick="goto('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      More
+    </div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  // ---------------- Local-file notice ----------------
+  if (window.location.protocol === 'file:'){
+    const notice = document.getElementById('localFileNotice');
+    if (notice) notice.style.display = 'block';
+  }
+
+  // ---------------- Slider ----------------
+  const slides = document.querySelectorAll('#slider .slide');
+  const dotsWrap = document.getElementById('slideDots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('span');
+    if (i === 0) d.classList.add('active');
+    dotsWrap.appendChild(d);
+  });
+  const dots = dotsWrap.querySelectorAll('span');
+  let slideIndex = 0;
+  function showSlide(i){
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slides[i].classList.add('active');
+    dots[i].classList.add('active');
+  }
+  setInterval(() => {
+    slideIndex = (slideIndex + 1) % slides.length;
+    showSlide(slideIndex);
+  }, 4000);
+
+  // ---------------- Navigation ----------------
+  const navMap = ['home','scan','result','history','weather','dashboard','expert','schemes','about'];
+  function goto(name){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navBtn = document.querySelector('.nav-item[data-nav="' + name + '"]');
+    if (navBtn) navBtn.classList.add('active');
+    if (name === 'history') renderHistory();
+    window.scrollTo(0,0);
+  }
+
+  // ---------------- Scan flow ----------------
+  const cropChips = document.querySelectorAll('#cropChips .crop-card');
+  let selectedCrop = 'Apple';
+  cropChips.forEach(c => c.addEventListener('click', () => {
+    cropChips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    selectedCrop = c.dataset.crop;
+  }));
+
+  let uploadedFile = null;
+  function handleFileSelect(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    uploadedFile = file;
+    const url = URL.createObjectURL(file);
+    document.getElementById('previewImg').src = url;
+    document.getElementById('previewWrap').style.display = 'block';
+    document.getElementById('analyzeSection').style.display = 'block';
+    document.getElementById('analyzeError').style.display = 'none';
+  }
+  document.querySelectorAll('.harudai-file-input').forEach(inp => inp.addEventListener('change', handleFileSelect));
+
+  function fileToBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  let history = [];
+  let currentLang = 'ur';
+  const sevLabelMap = { high:{ur:'زیادہ',en:'High',cls:'sev-high'}, medium:{ur:'درمیانی',en:'Medium',cls:'sev-medium'}, low:{ur:'کم',en:'Low',cls:'sev-low'} };
+
+  // ---------------- Backend configuration ----------------
+  // After you deploy the Firebase Cloud Function (see functions/index.js),
+  // paste its live URL here. Until then this stays as the placeholder and
+  // the app falls back to calling Claude directly (works only inside the
+  // Claude.ai preview, not on a real deployed website).
+  const ANALYZE_ENDPOINT = '/.netlify/functions/analyzeCrop';
+
+  async function startAnalysis(){
+    if (!uploadedFile){ showToast('Please add a photo first.'); return; }
+    document.getElementById('analyzeSection').style.display = 'none';
+    document.getElementById('analyzeError').style.display = 'none';
+    document.getElementById('analyzingBox').style.display = 'flex';
+
+    const useBackend = ANALYZE_ENDPOINT && !ANALYZE_ENDPOINT.startsWith('PASTE_');
+
+    try{
+      const base64 = await fileToBase64(uploadedFile);
+      const mediaType = uploadedFile.type || 'image/jpeg';
+      let parsed;
+
+      if (useBackend){
+        // Real deployment path: photo goes to YOUR Firebase Cloud Function,
+        // which holds the Anthropic key server-side and calls it for you.
+        const response = await fetch(ANALYZE_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64, mediaType, crop: selectedCrop, lang: currentLang })
+        });
+        if (!response.ok) throw new Error('Backend request failed with status ' + response.status);
+        parsed = await response.json();
+      } else {
+        // Claude-preview-only fallback: calls Anthropic directly. This ONLY
+        // works while viewing this file inside Claude.ai — see the note on
+        // the Scan screen and the message below.
+        const prompt = `You are an agricultural plant-pathologist assistant for farmers in Kashmir, India. `
+          + `First check: does this photo actually show a real leaf, fruit, plant, crop field or something you can meaningfully diagnose? `
+          + `If it does NOT (for example it's a screenshot, a person, a document, a random object, or the image is unclear), respond with ONLY this JSON and nothing else: `
+          + `{"is_valid_crop_photo":false,"message_en":"This doesn't look like a photo of a crop, leaf or fruit. Please upload a clear photo of the affected plant.","message_ur":"یہ فصل، پتے یا پھل کی تصویر نظر نہیں آتی۔ براہ کرم متاثرہ پودے کی واضح تصویر اپلوڈ کریں۔"}\n`
+          + `If it DOES show a real ${selectedCrop} leaf, fruit or plant, identify the most likely disease or disorder visible (or state it looks healthy if you see no disease), and respond with ONLY a raw JSON object, no markdown fences, no extra text, in exactly this shape:\n`
+          + `{"is_valid_crop_photo":true,"crop":"...","disease_en":"...","severity":"low|medium|high","confidence":0-100,`
+          + `"cause_en":"...","cause_ur":"...","treatment_en":"...","treatment_ur":"...",`
+          + `"prevention_en":"...","prevention_ur":"...","weather_risk_en":"...","weather_risk_ur":"..."}\n`
+          + `Keep each field to one short, practical sentence a farmer can act on. Write the *_ur fields in natural, simple Urdu.`;
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 1000,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+                { type: 'text', text: prompt }
+              ]
+            }]
+          })
+        });
+        if (!response.ok) throw new Error('API request failed with status ' + response.status);
+        const data = await response.json();
+        const textBlock = (data.content || []).map(b => b.text || '').join('\n');
+        const cleaned = textBlock.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(cleaned);
+      }
+
+      if (parsed.is_valid_crop_photo === false){
+        document.getElementById('analyzingBox').style.display = 'none';
+        document.getElementById('analyzeSection').style.display = 'block';
+        const errBox = document.getElementById('analyzeError');
+        errBox.textContent = currentLang === 'ur' ? parsed.message_ur : parsed.message_en;
+        errBox.style.display = 'block';
+        return;
+      }
+
+      showResult(parsed);
+    } catch (err){
+      console.error('HarudAI analysis error:', err);
+      document.getElementById('analyzingBox').style.display = 'none';
+      document.getElementById('analyzeSection').style.display = 'block';
+      const errBox = document.getElementById('analyzeError');
+      const isNetworkFailure = err instanceof TypeError;
+
+      let msg;
+      if (!useBackend && isNetworkFailure){
+        msg = 'Could not reach the AI. This usually means one of two things: your internet is slow/unstable right now, or the Firebase backend isn\'t deployed yet — until it is, this only works inside the Claude.ai preview, not on a phone browser. Try again on a stronger connection, or finish the backend deploy steps.';
+      } else if (useBackend && isNetworkFailure){
+        msg = 'Could not reach the AI backend. Check your internet connection, or make sure this site is deployed on Netlify with the ANTHROPIC_API_KEY environment variable set.';
+      } else {
+        msg = 'Could not analyze the photo right now. Please try again in a moment.';
+      }
+      errBox.innerHTML = '';
+      const msgSpan = document.createElement('span');
+      msgSpan.textContent = msg;
+      const retryBtn = document.createElement('button');
+      retryBtn.textContent = 'Try Again';
+      retryBtn.style.cssText = 'display:block;margin-top:10px;background:var(--danger);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:12.5px;cursor:pointer;';
+      retryBtn.onclick = startAnalysis;
+      errBox.appendChild(msgSpan);
+      errBox.appendChild(retryBtn);
+      errBox.style.display = 'block';
+    }
+  }
+
+  function showResult(parsed){
+    document.getElementById('analyzingBox').style.display = 'none';
+    const sev = sevLabelMap[parsed.severity] || sevLabelMap.medium;
+    document.getElementById('rSeverity').className = 'severity-pill ' + sev.cls;
+
+    window._currentResult = { parsed, sev };
+    setLang(currentLang);
+
+    history.unshift({
+      crop: parsed.crop || selectedCrop, disease: parsed.disease_en, severity: parsed.severity || 'medium',
+      date: new Date().toLocaleDateString(), parsed
+    });
+
+    goto('result');
+  }
+
+  function setLang(lang){
+    currentLang = lang;
+    document.getElementById('langUr').classList.toggle('active', lang === 'ur');
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.querySelectorAll('.r-label').forEach(el => {
+      el.classList.toggle('urdu', lang === 'ur');
+      el.textContent = lang === 'ur' ? el.dataset.ur : el.dataset.en;
+    });
+    if (window._currentResult){
+      const { parsed, sev } = window._currentResult;
+      document.getElementById('rCrop').textContent = parsed.crop || selectedCrop;
+      document.getElementById('rDisease').textContent = parsed.disease_en;
+      document.getElementById('rSeverity').textContent = lang === 'ur' ? sev.ur : sev.en;
+      document.getElementById('rConfidence').textContent = (parsed.confidence !== undefined ? parsed.confidence : '—') + '%';
+      document.getElementById('rCause').textContent = lang === 'ur' ? parsed.cause_ur : parsed.cause_en;
+      document.getElementById('rTreatment').textContent = lang === 'ur' ? parsed.treatment_ur : parsed.treatment_en;
+      document.getElementById('rPrevention').textContent = lang === 'ur' ? parsed.prevention_ur : parsed.prevention_en;
+      document.getElementById('rWeatherRisk').textContent = lang === 'ur' ? parsed.weather_risk_ur : parsed.weather_risk_en;
+      document.getElementById('rCause').classList.toggle('urdu', lang === 'ur');
+      document.getElementById('rTreatment').classList.toggle('urdu', lang === 'ur');
+      document.getElementById('rPrevention').classList.toggle('urdu', lang === 'ur');
+      document.getElementById('voiceLabel').textContent = lang === 'ur' ? 'سنیں' : 'Listen';
+    }
+  }
+
+  function playVoice(){
+    if (!window._currentResult){ showToast('No report to read yet.'); return; }
+    const { parsed } = window._currentResult;
+    const text = currentLang === 'ur'
+      ? `آپ کی فصل میں ${parsed.disease_en} پائی گئی ہے۔ علاج کے لیے ${parsed.treatment_ur}`
+      : `Your crop shows signs of ${parsed.disease_en}. Treatment: ${parsed.treatment_en}`;
+    if ('speechSynthesis' in window){
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = currentLang === 'ur' ? 'ur-PK' : 'en-US';
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(currentLang === 'ur' ? 'ur' : 'en'));
+      if (match) utter.voice = match;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    } else {
+      showToast('Voice playback is not supported on this device.');
+    }
+  }
+
+  function shareReport(){
+    const text = 'HarudAI crop scan report — see attached PDF.';
+    if (navigator.share){
+      navigator.share({ title: 'HarudAI Report', text }).catch(() => {});
+    } else {
+      showToast('Sharing is not supported here — try Download PDF instead.');
+    }
+  }
+
+  function renderHistory(){
+    const wrap = document.getElementById('historyList');
+    if (!history.length){
+      wrap.innerHTML = '<div style="padding:30px 18px;color:var(--ink-soft);font-size:13.5px;text-align:center;">No scans yet — analyze a photo from the Scan tab and it will show up here.</div>';
+      return;
+    }
+    const sevLabel = { high:'High', medium:'Medium', low:'Low' };
+    wrap.innerHTML = history.map((it, idx) => `
+      <div class="history-item" onclick="reopenHistory(${idx})">
+        <div class="hi-left">
+          <div class="hi-crop">${it.crop} — ${it.disease}</div>
+          <div class="hi-date">${it.date}</div>
+        </div>
+        <span class="severity-pill sev-${it.severity}">${sevLabel[it.severity] || it.severity}</span>
+      </div>
+    `).join('');
+  }
+
+  function reopenHistory(idx){
+    const item = history[idx];
+    if (!item) return;
+    showResult(item.parsed);
+  }
+
+  // ---------------- Toast ----------------
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>
